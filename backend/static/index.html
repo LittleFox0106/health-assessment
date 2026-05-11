@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康测评 - 了解你的身体</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #dbeafe;
+            --success: #16a34a;
+            --success-light: #dcfce7;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-900: #111827;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--gray-900);
+        }
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Header Bar */
+        .header-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .header-bar .logo { font-weight: 700; color: var(--primary); font-size: 18px; }
+        .header-bar .user-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .header-bar .user-btn:hover { background: var(--primary-dark); }
+        .header-bar .user-btn.anonymous { background: var(--gray-500); }
+        .header-bar .user-btn.logged-in { background: var(--success); }
+
+        /* Card */
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 36px 32px;
+            animation: fadeInUp 0.4s ease;
+            margin-top: 60px;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header */
+        .header { text-align: center; margin-bottom: 28px; }
+        .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+        .header p { color: var(--gray-500); font-size: 14px; }
+
+        /* Progress Bar */
+        .progress-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 28px;
+        }
+        .progress-step {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--gray-200);
+            transition: background 0.3s;
+        }
+        .progress-step.active { background: var(--primary); }
+        .progress-step.done { background: var(--success); }
+
+        /* Form */
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--gray-700);
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+            outline: none;
+            background: var(--gray-50);
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            background: #fff;
+        }
+        .form-group .hint {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        /* Option Cards */
+        .option-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .option-card {
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--gray-50);
+        }
+        .option-card:hover {
+            border-color: var(--primary-light);
+            background: var(--primary-light);
+        }
+        .option-card.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+        }
+        .option-card .icon { font-size: 28px; margin-bottom: 6px; }
+        .option-card .label { font-size: 14px; font-weight: 600; }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:disabled {
+            background: var(--gray-300);
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            margin-top: 10px;
+        }
+        .btn-secondary:hover { background: var(--gray-200); }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-success:hover { background: #15803d; }
+        .btn-link {
+            background: none;
+            color: var(--primary);
+            font-size: 14px;
+            padding: 8px;
+        }
+        .btn-link:hover { text-decoration: underline; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 28px;
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+        .modal h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .modal .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--gray-100);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--gray-500);
+        }
+        .modal .switch-text {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--gray-500);
+        }
+        .modal .switch-text a {
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* Result Page */
+        .result-hero {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 24px;
+        }
+        .bmi-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .bmi-circle.normal { background: var(--success); }
+        .bmi-circle.overweight { background: var(--warning); }
+        .bmi-circle.obese { background: var(--danger); }
+        .bmi-circle.underweight { background: #3b82f6; }
+        .bmi-circle .unit { font-size: 12px; font-weight: 400; opacity: .8; }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .result-item {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+        .result-item .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .result-item .label {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+        .result-item.locked {
+            position: relative;
+        }
+        .result-item.locked .value {
+            color: var(--gray-300);
+        }
+        .result-item.locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 14px;
+        }
+
+        /* Paywall */
+        .paywall {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .paywall h3 { font-size: 18px; margin-bottom: 8px; }
+        .paywall p { font-size: 13px; opacity: .9; margin-bottom: 16px; }
+        .paywall .btn {
+            background: #fff;
+            color: var(--primary-dark);
+        }
+        .paywall .btn:hover { background: var(--gray-100); }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gray-900);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            animation: fadeInDown 0.3s ease;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translate(-50%, -10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        /* Hidden */
+        .hidden { display: none !important; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container { padding: 12px; }
+            .card { padding: 24px 20px; }
+            .option-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Bar -->
+    <div class="header-bar">
+        <div class="logo">💪 健康测评</div>
+        <button class="user-btn anonymous" id="user-btn" onclick="openAuthModal()">
+            登录 / 注册
+        </button>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal" style="position: relative;">
+            <button class="close-btn" onclick="closeAuthModal()">×</button>
+            
+            <!-- Login Form -->
+            <div id="login-form">
+                <h2>欢迎回来</h2>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="login-email" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="login-password" placeholder="输入密码">
+                </div>
+                <button class="btn btn-primary" onclick="doLogin()">登录</button>
+                <div class="switch-text">
+                    还没有账号？<a onclick="switchToRegister()">立即注册</a>
+                </div>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="register-form" class="hidden">
+                <h2>创建账号</h2>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="register-email" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="register-password" placeholder="至少6位密码">
+                </div>
+                <button class="btn btn-primary" onclick="doRegister()">注册</button>
+                <div class="switch-text">
+                    已有账号？<a onclick="switchToLogin()">立即登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pay Login Modal -->
+    <div class="modal-overlay" id="pay-login-modal">
+        <div class="modal" style="position: relative;">
+            <button class="close-btn" onclick="closePayLoginModal()">×</button>
+            <h2>🔒 解锁完整报告</h2>
+            <p style="text-align: center; color: var(--gray-500); margin-bottom: 20px;">
+                登录后即可购买会员，查看完整健康分析
+            </p>
+            <div class="form-group">
+                <label>邮箱</label>
+                <input type="email" id="pay-login-email" placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="pay-login-password" placeholder="输入密码">
+            </div>
+            <button class="btn btn-primary" onclick="doPayLogin()">登录并继续</button>
+            <button class="btn btn-link" onclick="showPayRegister()">还没有账号？注册</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Step 1: Gender + Goal -->
+        <div id="step1" class="card">
+            <div class="header">
+                <h1>开始你的健康测评</h1>
+                <p>只需 3 步，获取专属健康方案</p>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-step active" id="p1"></div>
+                <div class="progress-step" id="p2"></div>
+                <div class="progress-step" id="p3"></div>
+            </div>
+            <div class="form-group">
+                <label>你的性别</label>
+                <div class="option-grid" id="gender-options">
+                    <div class="option-card" data-value="male" onclick="selectOption('gender', 'male', this)">
+                        <div class="icon">👨</div>
+                        <div class="label">男性</div>
+                    </div>
+                    <div class="option-card" data-value="female" onclick="selectOption('gender', 'female', this)">
+                        <div class="icon">👩</div>
+                        <div class="label">女性</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>你的健康目标</label>
+                <div class="option-grid" id="goal-options">
+                    <div class="option-card" data-value="lose_weight" onclick="selectOption('goal', 'lose_weight', this)">
+                        <div class="icon">🔥</div>
+                        <div class="label">减脂瘦身</div>
+                    </div>
+                    <div class="option-card" data-value="gain_muscle" onclick="selectOption('goal', 'gain_muscle', this)">
+                        <div class="icon">💪</div>
+                        <div class="label">增肌塑形</div>
+                    </div>
+                    <div class="option-card" data-value="maintain" onclick="selectOption('goal', 'maintain', this)">
+                        <div class="icon">⚖️</div>
+                        <div class="label">维持体重</div>
+                    </div>
+                    <div class="option-card" data-value="improve_endurance" onclick="selectOption('goal', 'improve_endurance', this)">
+                        <div class="icon">🏃</div>
+                        <div class="label">提升体能</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="btn-step1" disabled onclick="saveStep1()">下一步</button>
+        </div>
+
+        <!-- Step 2: Body Data -->
+        <div id="step2" class="card hidden">
+            <div class="header">
+                <h1>身体数据</h1>
+                <p>帮助我们精准计算你的健康指标</p>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-step done" id="p1"></div>
+                <div class="progress-step active" id="p2"></div>
+                <div class="progress-step" id="p3"></div>
+            </div>
+            <div class="form-group">
+                <label>年龄</label>
+                <input type="number" id="age" min="1" max="120" placeholder="请输入年龄">
+                <div class="hint">年龄范围：1-120 岁</div>
+            </div>
+            <div class="form-group">
+                <label>身高 (cm)</label>
+                <input type="number" id="height" min="50" max="300" step="0.1" placeholder="例如：175">
+                <div class="hint">身高范围：50-300 cm</div>
+            </div>
+            <div class="form-group">
+                <label>体重 (kg)</label>
+                <input type="number" id="weight" min="20" max="500" step="0.1" placeholder="例如：70">
+                <div class="hint">体重范围：20-500 kg</div>
+            </div>
+            <button class="btn btn-secondary" onclick="goBack(1)">上一步</button>
+            <button class="btn btn-primary" onclick="saveStep2()">下一步</button>
+        </div>
+
+        <!-- Step 3: Target + Exercise -->
+        <div id="step3" class="card hidden">
+            <div class="header">
+                <h1>目标与习惯</h1>
+                <p>最后一步，为你定制专属方案</p>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-step done" id="p1"></div>
+                <div class="progress-step done" id="p2"></div>
+                <div class="progress-step active" id="p3"></div>
+            </div>
+            <div class="form-group">
+                <label>目标体重 (kg)</label>
+                <input type="number" id="target-weight" min="20" max="500" step="0.1" placeholder="你希望达到的体重">
+            </div>
+            <div class="form-group">
+                <label>每周运动频率</label>
+                <div class="option-grid" id="exercise-options">
+                    <div class="option-card" data-value="never" onclick="selectOption('exercise', 'never', this)">
+                        <div class="icon">🛋️</div>
+                        <div class="label">几乎不运动</div>
+                    </div>
+                    <div class="option-card" data-value="1-2_times" onclick="selectOption('exercise', '1-2_times', this)">
+                        <div class="icon">🚶</div>
+                        <div class="label">1-2 次/周</div>
+                    </div>
+                    <div class="option-card" data-value="3-5_times" onclick="selectOption('exercise', '3-5_times', this)">
+                        <div class="icon">🏋️</div>
+                        <div class="label">3-5 次/周</div>
+                    </div>
+                    <div class="option-card" data-value="daily" onclick="selectOption('exercise', 'daily', this)">
+                        <div class="icon">🏃‍♂️</div>
+                        <div class="label">每天运动</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="goBack(2)">上一步</button>
+            <button class="btn btn-primary" onclick="saveStep3()">查看我的健康报告</button>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="card hidden">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>正在分析你的健康数据...</p>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div id="result" class="card hidden">
+            <div class="result-hero">
+                <div class="bmi-circle" id="bmi-circle">
+                    <span id="bmi-value">--</span>
+                    <span class="unit">BMI</span>
+                </div>
+                <h2 id="bmi-category">--</h2>
+                <p id="bmi-desc" style="color:var(--gray-500);font-size:13px;margin-top:4px;"></p>
+            </div>
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="value" id="r-bmr">--</div>
+                    <div class="label">基础代谢 (kcal)</div>
+                </div>
+                <div class="result-item">
+                    <div class="value" id="r-tdee">--</div>
+                    <div class="label">每日消耗 (kcal)</div>
+                </div>
+                <div class="result-item">
+                    <div class="value" id="r-intake">--</div>
+                    <div class="label">建议摄入 (kcal)</div>
+                </div>
+                <div class="result-item locked" id="r-prediction-item">
+                    <div class="value" id="r-prediction">--</div>
+                    <div class="label">预计达成天数</div>
+                </div>
+            </div>
+            <!-- Premium section (locked for free users) -->
+            <div id="premium-section">
+                <div class="paywall" id="paywall">
+                    <h3>🔓 解锁完整健康报告</h3>
+                    <p>升级会员查看目标预测、营养素分解、每周体重变化曲线等详细数据</p>
+                    <button class="btn" onclick="handlePayClick()">立即解锁 - 模拟支付</button>
+                </div>
+                <div class="result-grid hidden" id="premium-data">
+                    <div class="result-item">
+                        <div class="value" id="r-protein">--</div>
+                        <div class="label">蛋白质 (g)</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="value" id="r-carbs">--</div>
+                        <div class="label">碳水 (g)</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="value" id="r-fat">--</div>
+                        <div class="label">脂肪 (g)</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="value" id="r-weekly">--</div>
+                        <div class="label">每周变化 (kg)</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="restart()">重新测评</button>
+        </div>
+    </div>
+
+    <script>
+        const API = '';
+        let token = localStorage.getItem('ha_token') || '';
+        let userId = localStorage.getItem('ha_userId') || '';
+        let sessionId = localStorage.getItem('ha_sessionId') || '';
+        let userEmail = localStorage.getItem('ha_email') || '';
+        let isAnonymous = localStorage.getItem('ha_isAnonymous') !== 'false';
+        let formData = { gender: '', goal: '', exercise: '' };
+
+        // Category labels
+        const CATEGORY_LABELS = {
+            underweight: '偏瘦',
+            normal: '体重正常',
+            overweight: '偏胖',
+            obese: '肥胖'
+        };
+        const CATEGORY_DESC = {
+            underweight: '建议适当增加营养摄入',
+            normal: '继续保持健康的生活方式',
+            overweight: '建议通过饮食和运动进行调整',
+            obese: '建议制定科学的减脂计划'
+        };
+
+        // Init
+        async function init() {
+            updateUserButton();
+            if (!token) {
+                try {
+                    const resp = await fetch(API + '/api/v1/users/init', { method: 'POST' });
+                    const data = await resp.json();
+                    token = data.data.session_token;
+                    userId = data.data.user_id;
+                    isAnonymous = true;
+                    localStorage.setItem('ha_token', token);
+                    localStorage.setItem('ha_userId', userId);
+                    localStorage.setItem('ha_isAnonymous', 'true');
+                } catch (e) {
+                    showToast('网络错误，请刷新重试');
+                    return;
+                }
+            }
+            // Try to recover progress
+            if (sessionId) {
+                try {
+                    const resp = await fetch(API + '/api/v1/sessions/' + sessionId + '/progress', {
+                        headers: { 'X-Session-Token': token }
+                    });
+                    const data = await resp.json();
+                    if (data.code === 200) {
+                        const p = data.data;
+                        if (p.status === 'completed') {
+                            showResult();
+                            return;
+                        }
+                        // Restore form data
+                        if (p.gender) { formData.gender = p.gender; highlightOption('gender', p.gender); }
+                        if (p.goal) { formData.goal = p.goal; highlightOption('goal', p.goal); }
+                        if (p.exercise_frequency) { formData.exercise = p.exercise_frequency; highlightOption('exercise', p.exercise_frequency); }
+                        if (p.age) document.getElementById('age').value = p.age;
+                        if (p.height_cm) document.getElementById('height').value = p.height_cm;
+                        if (p.weight_kg) document.getElementById('weight').value = p.weight_kg;
+                        if (p.target_weight_kg) document.getElementById('target-weight').value = p.target_weight_kg;
+
+                        if (p.current_step >= 4 || p.status === 'completed') {
+                            showResult();
+                        } else if (p.current_step >= 3) {
+                            showStep(3);
+                        } else if (p.current_step >= 2) {
+                            showStep(2);
+                        }
+                        updateStep1Button();
+                        return;
+                    }
+                } catch (e) { /* ignore */ }
+            }
+        }
+
+        function updateUserButton() {
+            const btn = document.getElementById('user-btn');
+            if (userEmail) {
+                btn.textContent = userEmail;
+                btn.className = 'user-btn logged-in';
+                btn.onclick = () => showToast('已登录: ' + userEmail);
+            } else {
+                btn.textContent = '登录 / 注册';
+                btn.className = 'user-btn anonymous';
+                btn.onclick = openAuthModal;
+            }
+        }
+
+        // Auth Modal
+        function openAuthModal() {
+            document.getElementById('auth-modal').classList.add('active');
+            switchToLogin();
+        }
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.remove('active');
+        }
+        function switchToLogin() {
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('register-form').classList.add('hidden');
+        }
+        function switchToRegister() {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        }
+
+        // Pay Login Modal
+        function openPayLoginModal() {
+            document.getElementById('pay-login-modal').classList.add('active');
+        }
+        function closePayLoginModal() {
+            document.getElementById('pay-login-modal').classList.remove('active');
+        }
+        function showPayRegister() {
+            closePayLoginModal();
+            openAuthModal();
+            switchToRegister();
+        }
+
+        // Auth API
+        async function doLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            if (!email || !password) { showToast('请填写邮箱和密码'); return; }
+
+            try {
+                const resp = await fetch(API + '/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await resp.json();
+                if (data.code === 200) {
+                    token = data.data.session_token;
+                    userId = data.data.user_id;
+                    userEmail = data.data.email;
+                    isAnonymous = false;
+                    localStorage.setItem('ha_token', token);
+                    localStorage.setItem('ha_userId', userId);
+                    localStorage.setItem('ha_email', userEmail);
+                    localStorage.setItem('ha_isAnonymous', 'false');
+                    sessionId = '';
+                    localStorage.removeItem('ha_sessionId');
+                    updateUserButton();
+                    closeAuthModal();
+                    showToast('登录成功！');
+                } else {
+                    showToast(data.message || '登录失败');
+                }
+            } catch (e) {
+                showToast('网络错误');
+            }
+        }
+
+        async function doRegister() {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            if (!email || !password) { showToast('请填写邮箱和密码'); return; }
+            if (password.length < 6) { showToast('密码至少6位'); return; }
+
+            try {
+                const resp = await fetch(API + '/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await resp.json();
+                if (data.code === 200) {
+                    token = data.data.session_token;
+                    userId = data.data.user_id;
+                    userEmail = data.data.email;
+                    isAnonymous = false;
+                    localStorage.setItem('ha_token', token);
+                    localStorage.setItem('ha_userId', userId);
+                    localStorage.setItem('ha_email', userEmail);
+                    localStorage.setItem('ha_isAnonymous', 'false');
+                    sessionId = '';
+                    localStorage.removeItem('ha_sessionId');
+                    updateUserButton();
+                    closeAuthModal();
+                    showToast('注册成功！');
+                } else {
+                    showToast(data.message || '注册失败');
+                }
+            } catch (e) {
+                showToast('网络错误');
+            }
+        }
+
+        async function doPayLogin() {
+            const email = document.getElementById('pay-login-email').value;
+            const password = document.getElementById('pay-login-password').value;
+            if (!email || !password) { showToast('请填写邮箱和密码'); return; }
+
+            try {
+                const resp = await fetch(API + '/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await resp.json();
+                if (data.code === 200) {
+                    token = data.data.session_token;
+                    userId = data.data.user_id;
+                    userEmail = data.data.email;
+                    isAnonymous = false;
+                    localStorage.setItem('ha_token', token);
+                    localStorage.setItem('ha_userId', userId);
+                    localStorage.setItem('ha_email', userEmail);
+                    localStorage.setItem('ha_isAnonymous', 'false');
+                    sessionId = '';
+                    localStorage.removeItem('ha_sessionId');
+                    updateUserButton();
+                    closePayLoginModal();
+                    // Continue to pay
+                    doActualPay();
+                } else {
+                    showToast(data.message || '登录失败');
+                }
+            } catch (e) {
+                showToast('网络错误');
+            }
+        }
+
+        async function createSession() {
+            if (!sessionId) {
+                const resp = await fetch(API + '/api/v1/sessions', {
+                    method: 'POST',
+                    headers: { 'X-Session-Token': token }
+                });
+                const data = await resp.json();
+                if (!resp.ok || !data.data || !data.data.session_id) {
+                    showToast(data.detail || data.message || '创建会话失败，请刷新重试');
+                    return false;
+                }
+                sessionId = data.data.session_id;
+                localStorage.setItem('ha_sessionId', sessionId);
+            }
+            return true;
+        }
+
+        // Option selection
+        function selectOption(group, value, el) {
+            formData[group] = value;
+            const container = el.parentElement;
+            container.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            if (group === 'gender' || group === 'goal') updateStep1Button();
+        }
+
+        function highlightOption(group, value) {
+            const map = { gender: 'gender-options', goal: 'goal-options', exercise: 'exercise-options' };
+            const container = document.getElementById(map[group]);
+            if (!container) return;
+            container.querySelectorAll('.option-card').forEach(c => {
+                c.classList.toggle('selected', c.dataset.value === value);
+            });
+        }
+
+        function updateStep1Button() {
+            document.getElementById('btn-step1').disabled = !(formData.gender && formData.goal);
+        }
+
+        // Step navigation
+        function showStep(n) {
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+            document.getElementById('step' + n).classList.remove('hidden');
+        }
+
+        function goBack(n) {
+            showStep(n);
+        }
+
+        // Save steps
+        async function saveStep1() {
+            const ok = await createSession();
+            if (!ok) return;
+            const resp = await apiFetch('/api/v1/sessions/' + sessionId + '/step/1', 'PATCH', {
+                gender: formData.gender, goal: formData.goal
+            });
+            if (resp.code === 200) { showStep(2); }
+            else { showToast(resp.message || '保存失败'); }
+        }
+
+        async function saveStep2() {
+            const age = parseInt(document.getElementById('age').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            if (!age || !height || !weight) { showToast('请填写完整数据'); return; }
+            if (age < 1 || age > 120) { showToast('年龄需在 1-120 之间'); return; }
+            if (height < 50 || height > 300) { showToast('身高需在 50-300 之间'); return; }
+            if (weight < 20 || weight > 500) { showToast('体重需在 20-500 之间'); return; }
+
+            const resp = await apiFetch('/api/v1/sessions/' + sessionId + '/step/2', 'PATCH', {
+                age, height_cm: height, weight_kg: weight
+            });
+            if (resp.code === 200) { showStep(3); }
+            else { showToast(resp.message || '保存失败'); }
+        }
+
+        async function saveStep3() {
+            const targetWeight = parseFloat(document.getElementById('target-weight').value);
+            if (!targetWeight) { showToast('请填写目标体重'); return; }
+            if (!formData.exercise) { showToast('请选择运动频率'); return; }
+
+            const resp = await apiFetch('/api/v1/sessions/' + sessionId + '/step/3', 'PATCH', {
+                target_weight_kg: targetWeight, exercise_frequency: formData.exercise
+            });
+            if (resp.code !== 200) { showToast(resp.message || '保存失败'); return; }
+
+            // Show loading, then submit
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+            document.getElementById('loading').classList.remove('hidden');
+
+            const submitResp = await apiFetch('/api/v1/sessions/' + sessionId + '/submit', 'POST');
+            if (submitResp.code === 200) {
+                setTimeout(() => showResult(), 800);
+            } else {
+                showToast(submitResp.message || '提交失败');
+                showStep(3);
+            }
+        }
+
+        // Result
+        async function showResult() {
+            const resp = await apiFetch('/api/v1/sessions/' + sessionId + '/result', 'GET');
+            if (resp.code !== 200) { showToast('获取结果失败'); return; }
+            const d = resp.data;
+
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+            document.getElementById('result').classList.remove('hidden');
+
+            // BMI
+            const bmiCircle = document.getElementById('bmi-circle');
+            bmiCircle.className = 'bmi-circle ' + (d.bmi_category || 'normal');
+            document.getElementById('bmi-value').textContent = d.bmi_value || '--';
+            document.getElementById('bmi-category').textContent = CATEGORY_LABELS[d.bmi_category] || '--';
+            document.getElementById('bmi-desc').textContent = CATEGORY_DESC[d.bmi_category] || '';
+
+            // Basic results
+            document.getElementById('r-bmr').textContent = d.bmr ? Math.round(d.bmr) : '--';
+            document.getElementById('r-tdee').textContent = d.tdee ? Math.round(d.tdee) : '--';
+            document.getElementById('r-intake').textContent = d.daily_calorie_intake || '--';
+
+            // Premium check
+            const predItem = document.getElementById('r-prediction-item');
+            if (d.is_premium) {
+                document.getElementById('paywall').classList.add('hidden');
+                document.getElementById('premium-data').classList.remove('hidden');
+                predItem.classList.remove('locked');
+                document.getElementById('r-prediction').textContent = d.target_prediction_days ? d.target_prediction_days + ' 天' : '--';
+                document.getElementById('r-protein').textContent = d.protein_g || '--';
+                document.getElementById('r-carbs').textContent = d.carbs_g || '--';
+                document.getElementById('r-fat').textContent = d.fat_g || '--';
+                document.getElementById('r-weekly').textContent = d.weekly_weight_change_kg || '--';
+            } else {
+                document.getElementById('paywall').classList.remove('hidden');
+                document.getElementById('premium-data').classList.add('hidden');
+                predItem.classList.add('locked');
+                document.getElementById('r-prediction').textContent = '--';
+            }
+        }
+
+        // Pay with login check
+        function handlePayClick() {
+            if (isAnonymous) {
+                openPayLoginModal();
+            } else {
+                doActualPay();
+            }
+        }
+
+        async function doActualPay() {
+            const resp = await apiFetch('/api/v1/pay', 'POST', { user_id: userId });
+            if (resp.code === 200) {
+                showToast('🎉 支付成功！会员已激活');
+                setTimeout(() => showResult(), 500);
+            } else {
+                showToast(resp.message || '支付失败');
+            }
+        }
+
+        // Restart
+        function restart() {
+            sessionId = '';
+            localStorage.removeItem('ha_sessionId');
+            formData = { gender: '', goal: '', exercise: '' };
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('age').value = '';
+            document.getElementById('height').value = '';
+            document.getElementById('weight').value = '';
+            document.getElementById('target-weight').value = '';
+            document.getElementById('btn-step1').disabled = true;
+            showStep(1);
+        }
+
+        // API helper
+        async function apiFetch(url, method, body) {
+            const opts = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Session-Token': token
+                }
+            };
+            if (body) opts.body = JSON.stringify(body);
+            const resp = await fetch(API + url, opts);
+            return await resp.json();
+        }
+
+        // Toast
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
